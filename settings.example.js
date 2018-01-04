@@ -21,11 +21,24 @@ module.exports = {
 	token: {
 		instagram: "",
 		makiUpload: "",
-		youtube: ""
+		youtube: "",
+		cloudflare: {
+			email: "",
+			key: "",
+			zone: ""
+		}
 	},
 
 	secure: {
 		cert: "",
 		key: ""
+	},
+
+	extra: {
+		polaristhicc: {
+			token: "",
+			dns_id: "",
+			record: ""
+		}	
 	}
 }

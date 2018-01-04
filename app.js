@@ -55,6 +55,7 @@ require(__dirname+"/timers/instagram");
 	require(__dirname+"/routes/pages/main");
 	require(__dirname+"/routes/pages/iplol");
 	require(__dirname+"/routes/pages/discord");
+	require(__dirname+"/routes/pages/polaristhicc");
 	
 	// Systems
 	require(__dirname+"/routes/systems/redirect");
