@@ -110,7 +110,7 @@ function makePlace(place, name) {
 				(res.y>=0 && res.y<place.board_size) &&
 				(res.c>=0 && res.c<16) &&
 				(now > timeout[socket.id]) &&
-				(res.token == place.token)
+				(res.token.toLowerCase() == place.token)
 			) {
 				place.board[res.x+(res.y*place.board_size)] = res.c;
 				//global.log(ip + " placed at "+res.x+","+res.y);
