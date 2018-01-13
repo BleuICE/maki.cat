@@ -1,8 +1,6 @@
 var moment = require("moment");
 var fs = require("fs");
 
-global.log = function(ee) {console.log(ee);};
-
 var game = {
 	online: 0
 }
@@ -12,11 +10,39 @@ var timeout = {};
 // Web Server
 
 global.app.get("/place", function(req, res) {
-	res.redirect("/place/public")
+	let public_places = "";
+	let protected_places = "";
+
+	let end = '</p></a></td>';
+	for (var i=0; i<Object.keys(global.places).length; i++) {
+		let name = Object.keys(global.places)[i];
+		let place = global.places[name];
+	
+		let start = '<td><a href="https://maki.cat/place/'+name.toLowerCase()+'"><p>';
+
+		let html = "<tr>"+
+			start+name+end+
+			start+place.board_size+"x"+place.board_size+end+
+			start+place.public.place_timeout+"ms"+end+
+			start+place.public.online+" placing!"+end+
+		"</tr>";
+	
+		if (place.token) {
+			protected_places += html;
+		} else {
+			public_places += html;
+		}
+	}
+
+	res.send(
+		fs.readFileSync(__dirname+"/places.html", "utf8")
+			.replace(/\[public_places\]/gi, public_places)
+			.replace(/\[protected_places\]/gi, protected_places)
+	);
 });
 
 function webGetPlace(name) {
-	global.app.get("/place/"+name, function (req, res) {
+	global.app.get("/place/"+name.toLowerCase(), function (req, res) {
 		res.send(
 			fs.readFileSync(__dirname+"/game.html", "utf8")
 				.replace(/\[socket_namespace\]/gi, name)
@@ -105,7 +131,7 @@ function makePlace(place, name) {
 
 for (var i=0; i<Object.keys(global.places).length; i++) {
 	let name = Object.keys(global.places)[i];
-	let place = global.places[Object.keys(global.places)[i]];
+	let place = global.places[name];
 
 	webGetPlace(name);
 	loadPlace(place, name);

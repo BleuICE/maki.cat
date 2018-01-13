@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Maki's Place</title>
+		<title>Place</title>
 		<link href="https://fonts.googleapis.com/css?family=Roboto:400|700" rel="stylesheet">
 		<style type="text/css">
 			body {
@@ -30,14 +30,14 @@
 
 			#palette {
 				position: fixed; margin: auto;
-				bottom: 50px; left: 50px;
+				bottom: 25px; left: 0; right: 0;
 				width: 256px; height: 64px;
 			}
 
 			#info {
 				position: fixed; margin: auto;
-				bottom: 150px; left: 50px;
-				width: 90px; height: 74px;
+				bottom: 25px; left: 25px;
+				width: 200px; height: 58px;
 				padding: 5px;
 			}
 
@@ -113,10 +113,9 @@
 			<div class="color"></div>
 		</div>
 		<div id="info" class="box">
-			<p style="font-weight: 700;">Maki's Place</p>
-			<p><span id="players"></span> playing!</p>
+			<p style="font-weight: 700;" id="name">Place</p>
+			<p><span id="players">0</span> placing! <span id="ping"></span></p>
 			<p id="coords">(0,0)</p>
-			<p id="ping">__ms</p>
 		</div>
 		<!-- <div id="chat-box">
 			<textarea readonly id="chat"></textarea>
@@ -387,10 +386,12 @@
 			socket.on("game", function(res) {
 				Object.assign(game, res);
 				document.getElementById("players").textContent = game.online;
+				document.getElementById("name").textContent = document.title = 
+					game.name+"'s Place";
 
 				if (!game.loaded) {
 					if (game.protected) {
-						game.token = prompt("This place requires a token to draw.");
+						game.token = prompt("This place requires a password to draw.");
 					} else {
 						game.token = false;
 					}
