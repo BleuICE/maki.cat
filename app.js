@@ -68,6 +68,9 @@ require(__dirname+"/timers/instagram");
 	require(__dirname+"/routes/trash/chat");
 	require(__dirname+"/routes/trash/stb");
 
+	// Games
+	require(__dirname+"/routes/games/maki-place/app");
+
 	// Rip
 	global.app.use(express.static(__dirname+global.dir.public));
 	require(__dirname+"/routes/pages/404");

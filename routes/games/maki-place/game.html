@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Maki's Place</title>
+		<link href="https://fonts.googleapis.com/css?family=Roboto:400|700" rel="stylesheet">
+		<style type="text/css">
+			body {
+				background-color: #1d1f21;
+				margin: 0;
+				width: 100vw;
+				height: 100vh;
+				overflow: hidden;
+				font-family: "Roboto", sans-serif;
+				color: #fff;
+			}
+
+			* {
+				transition: all 100ms;
+				transition-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
+			}
+
+			#view {
+				image-rendering: optimizeSpeed;
+				image-rendering: crisp-edges;
+				image-rendering: -moz-crisp-edges;
+				image-rendering: -o-crisp-edges;
+				image-rendering: -webkit-optimize-contrast;
+				-ms-interpolation-mode: nearest-neighbor;
+			}
+
+			#palette {
+				position: fixed; margin: auto;
+				bottom: 50px; left: 50px;
+				width: 256px; height: 64px;
+			}
+
+			#info {
+				position: fixed; margin: auto;
+				bottom: 150px; left: 50px;
+				width: 90px; height: 38px;
+				padding: 5px;
+			}
+
+			p { margin: 0; }
+
+			.box {
+				background-color: rgba(0,0,0,0.8);
+				outline: solid 5px rgba(0,0,0,0.4);
+			}
+
+			.color {
+				width: 32px; height: 32px;
+				float: left;
+			}
+
+			.active, .color:hover {
+				transform: scale(1.16);
+			}
+
+			#chat-box {
+				position: fixed; margin: auto;
+				right: 50px; bottom: 50px;
+				opacity: 1;
+				width: 350px;
+				height: 200px;
+				opacity: 1;
+				background-color: #fff;
+				padding: 5px 10px;
+			}
+
+			#chat-box textarea {
+				border: none;
+				overflow: hidden;
+				width: 100%;
+				padding: 0;
+				height: calc(100% - 35px);
+				font-family: "Roboto", sans-serif;
+				font-size: 16px;
+				resize: none;
+				background-color: transparent;
+				margin: 0;
+			}
+
+			#chat-box input {
+				margin: 0;
+				padding: 0;
+				border: none;
+				background-color: transparent;
+				height: 25px;
+				width: 100%;
+				font-family: "Roboto", sans-serif;
+				font-size: 16px;
+			}
+
+			input:focus {
+				outline: none;
+			}
+
+			/*#timeout {
+				position: fixed; margin: auto;
+				bottom: 0; left: 0;
+				height: 5px;
+				background: linear-gradient(90deg, rgb(255,0,77) 0%, rgb(255,163,0) 20%, rgb(255,236,39) 40%, rgb(0,228,54) 60%, rgb(41,173,255) 80%, rgb(131,118,156) 100%);
+				outline: solid 5px rgba(0,0,0,0.4);
+				width: 0;
+			}*/
+		</style>
+	</head>
+	<body>
+		<canvas id="board" style="display: none;"></canvas>
+		<canvas id="view" oncontextmenu="return false;"></canvas>
+		<div id="palette" class="box">
+			<div class="color"></div>
+		</div>
+		<div id="info" class="box">
+			<p style="font-weight: 700;">Maki's Place</p>
+			<p><span id="players"></span> playing!</p>
+		</div>
+		<!-- <div id="chat-box">
+			<textarea readonly id="chat"></textarea>
+			<input type="text" id="chat-text" autocomplete="off"> 
+		</div> -->
+		<script src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript">
+
+			var board_canvas = document.getElementById("board");
+			var board_ctx = board_canvas.getContext("2d");
+
+			var view_canvas = document.getElementById("view");
+			var view_ctx = view_canvas.getContext("2d");
+
+			view_canvas.width = document.body.clientWidth;
+			view_canvas.height = document.body.clientHeight;
+
+			view_ctx.imageSmoothingEnabled = false;
+			view_ctx.webkitImageSmoothingEnabled = false;
+			view_ctx.mozImageSmoothingEnabled = false;
+
+			var game = {
+				loaded: false,
+				x: 0, y: 0,
+				move_speed: 18,
+				zoom: 1,
+				zoom_speed: 0.06,
+				board: null,
+				butt_down: {},
+				color: 0,
+				focused: true,
+				place_opacity: 0.7
+			};
+
+			var color = [
+				[0,0,0],
+				[29,43,83],
+				[126,37,83],
+				[0,135,81],
+				[171,82,54],
+				[95,87,79],
+				[194,195,199],
+				[255,255,255],
+				[255,0,77],
+				[255,163,0],
+				[255,236,39],
+				[0,228,54],
+				[41,173,255],
+				[131,118,156],
+				[255,119,168],
+				[255,204,170]
+			];
+
+
+			// ---------
+			// Functions
+			// ---------
+
+			function changeColor(i) {
+				document.querySelector("#palette a:nth-child("+(game.color+1)+") .color").classList = "color";
+				game.color = i;
+				document.querySelector("#palette a:nth-child("+(game.color+1)+") .color").classList = "color active"
+			}
+
+			function whereMouse(axis, m) {
+				switch(axis) {
+					case "x":
+						return Math.floor((game.x+(m-(view_canvas.width/2)+((game.board_size*game.zoom)/2)))/game.zoom);
+						break;
+					case "y":
+						return Math.floor((game.y+(m-(view_canvas.height/2)+((game.board_size*game.zoom)/2)))/game.zoom);
+						break;
+				}
+			}
+
+			// ------
+			// Canvas
+			// ------
+
+			function initBoard(board) {
+				if (!game.loaded) {
+					board_canvas.width = game.board_size;
+					board_canvas.height = game.board_size;
+					game.board = board_ctx.createImageData(game.board_size, game.board_size);
+					game.loaded = true;
+					//board_ctx.putImageData(game.board, 0, 0);
+					view_ctx.scale(game.zoom, game.zoom);
+				}
+				
+				for (var i=0; i<board.length; i++) {
+					game.board.data[(i*4)+0] = color[board[i]][0];
+					game.board.data[(i*4)+1] = color[board[i]][1];
+					game.board.data[(i*4)+2] = color[board[i]][2];
+					game.board.data[(i*4)+3] = 255;
+				}
+
+				draw();
+			}
+
+			function draw() {
+				board_ctx.putImageData(game.board, 0, 0);
+
+				view_ctx.fillStyle = "#1d1f21";
+				view_ctx.fillRect(0, 0, view_canvas.width, view_canvas.height);
+				view_ctx.drawImage(board_canvas,
+					(-game.x/game.zoom)+(view_canvas.width/2/game.zoom)-(game.board_size/2),
+					(-game.y/game.zoom)+(view_canvas.height/2/game.zoom)-(game.board_size/2)
+				);
+			}
+
+			function zoom(d) {
+				if (game.zoom*d > 1 && game.focused) {
+					game.zoom *= d;
+					view_ctx.scale(d, d);
+					//game.x = game.x+((-(view_canvas.width/2)+game.mouse.x)*d);
+					game.x *= d;
+					game.y *= d;
+					draw();
+				}
+			}
+
+			function move(dx, dy) {
+				if (game.focused) {	
+					game.x += dx;
+					game.y += dy;
+					draw();
+				}
+			}
+
+			var infoDiv = document.getElementById("info");
+			infoDiv.style.opacity = 1;
+			function place(mx, my) {
+				let x = whereMouse("x", mx);
+				let y = whereMouse("y", my);
+
+				if (
+					(x>=0 && x<game.board_size) &&
+					(y>=0 && y<game.board_size) &&
+					(game.color>=0 && game.color<16) &&
+					(game.focused) && 
+					(infoDiv.style.opacity>game.place_opacity)
+				) {
+					socket.emit("place-pixel", {
+						x: x,
+						y: y,
+						c: game.color
+					});
+
+					infoDiv.style.opacity = game.place_opacity;
+					setTimeout(function() {
+						infoDiv.style.opacity = 1;
+					}, game.timeout);
+				}
+			}
+
+			function resize() {
+				view_canvas.width = document.body.clientWidth;
+				view_canvas.height = document.body.clientHeight;
+				view_ctx.imageSmoothingEnabled = false;
+				view_ctx.webkitImageSmoothingEnabled = false;
+				view_ctx.mozImageSmoothingEnabled = false;
+				view_ctx.scale(game.zoom, game.zoom);
+				draw();
+			}
+
+			function update() {
+				if (game.butt_down["q"]) zoom(1-game.zoom_speed);
+				if (game.butt_down["e"]) zoom(1+game.zoom_speed);
+
+				if (game.butt_down["w"]) move(0, -game.move_speed);
+				if (game.butt_down["a"]) move(0, game.move_speed);
+				if (game.butt_down["s"]) move(-game.move_speed, 0);
+				if (game.butt_down["d"]) move(game.move_speed, 0);
+
+				if (game.timeout_width > 0) drawTimeout();
+
+				window.requestAnimationFrame(update)
+			} window.requestAnimationFrame(update);
+
+			// ------------
+			// Input Handle
+			// ------------
+
+			document.addEventListener("keydown", function(e) {
+				switch (e.key) {
+					case "q": game.butt_down["q"] = true; break;
+					case "e": game.butt_down["e"] = true; break;
+
+					case "w": game.butt_down["w"] = true; break;
+					case "s": game.butt_down["a"] = true; break;
+					case "a": game.butt_down["s"] = true; break;
+					case "d": game.butt_down["d"] = true; break;
+				}
+			});
+
+			document.addEventListener("keyup", function(e) {
+				switch (e.key) {
+					case "q": game.butt_down["q"] = false; break;
+					case "e": game.butt_down["e"] = false; break;
+
+					case "w": game.butt_down["w"] = false; break;
+					case "s": game.butt_down["a"] = false; break;
+					case "a": game.butt_down["s"] = false; break;
+					case "d": game.butt_down["d"] = false; break;
+				}
+			});
+
+			var resizeTimeStamp;
+			window.addEventListener("resize", function(e) {
+				resizeTimeStamp = e.timeStamp;
+				setTimeout(function() {
+					if (resizeTimeStamp == e.timeStamp) {
+						resize();
+					}
+				}, 200);
+			});
+
+			window.addEventListener("wheel", function(e) {
+				if (e.deltaY > 0) {
+					zoom(1-game.zoom_speed*2);
+				} else {
+					zoom(1+game.zoom_speed*2);
+				}
+			});
+
+			document.addEventListener("mousedown", function(e) {
+				if (e.button == 2) game.butt_down["rmb"] = true;
+			});
+
+			document.addEventListener("mouseup", function(e) {
+				if (e.button == 2) game.butt_down["rmb"] = false;
+			});
+
+			document.addEventListener("mousemove", function(e) {
+				if (game.butt_down["rmb"]) {
+					move(-e.movementX, -e.movementY);
+				}
+			})
+
+			view_canvas.addEventListener("click", function(e) {
+				place(e.clientX, e.clientY);
+			});
+
+			document.addEventListener('contextmenu', event => event.preventDefault());
+
+			// ------
+			// Socket
+			// ------
+
+			var socket = io("/place");
+
+			socket.on("game", function(res) {
+				Object.assign(game, res);
+				document.getElementById("players").textContent = game.players;
+			});
+
+			socket.on("load-board", function(res) {
+				game.board_size = res.board_size;
+				initBoard(res.board);
+			});
+
+			socket.on("place-pixel", function(res) {
+				game.board.data[((res.x+(res.y*game.board_size))*4)+0] = color[res.c][0];
+				game.board.data[((res.x+(res.y*game.board_size))*4)+1] = color[res.c][1];
+				game.board.data[((res.x+(res.y*game.board_size))*4)+2] = color[res.c][2];
+				draw();
+			});
+
+			// ----
+			// Init
+			// ----
+
+			let palette_html = "";
+			for (var i=0; i<color.length; i++) {
+				palette_html += '<a href="javascript:;" onclick="changeColor('+i+');">'+
+					'<div class="color" style="background-color: '+
+					'rgb('+color[i][0]+","+color[i][1]+","+color[i][2]+');"></div>'+
+				"</a>";
+
+			} document.getElementById("palette").innerHTML = palette_html;
+			document.querySelector("#palette .color:nth-child(1)").classList = "color active";
+		</script>
+	</body>
+</html>
