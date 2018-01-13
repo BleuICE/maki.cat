@@ -2,6 +2,7 @@
 // Didnt have any lessons... ¯\_(ツ)_/¯
 
 var moment = require("moment");
+var io = global.io.of("/chat");
 
 var chat = {
 	messages: [],
@@ -12,30 +13,30 @@ var chat = {
 	}
 }
 
-global.io.on("connection", function(socket) {
+io.on("connection", function(socket) {
 
 	var hs = socket.handshake.headers.referer.split("/");
 	if (hs.includes("chat") == false) { return; }
 
 	chat.room.online++;
-	global.io.emit("chat.roomInfo", chat.room);
-	socket.emit("chat.receiveAll", chat.messages);
+	io.emit("roomInfo", chat.room);
+	socket.emit("receiveAll", chat.messages);
 	
-	socket.on("chat.send", function(data) {
+	socket.on("send", function(data) {
 		data.date = moment();
 		
 		chat.messages.push(data);
-		global.io.emit("chat.receive", data);
+		io.emit("receive", data);
 	});
 	
-	socket.on("chat.clearChat", function() {
+	socket.on("clearChat", function() {
 		chat.messages = [];
-		global.io.emit("chat.clearChat");
+		io.emit("clearChat");
 	})
 	
 	socket.on("disconnect", function() {
 		chat.room.online--;
-		global.io.emit("chat.roomInfo", chat.room);
+		io.emit("roomInfo", chat.room);
 		//console.log("A user disconnected");
 	});		
 });

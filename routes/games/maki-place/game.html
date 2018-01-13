@@ -37,7 +37,7 @@
 			#info {
 				position: fixed; margin: auto;
 				bottom: 150px; left: 50px;
-				width: 90px; height: 38px;
+				width: 90px; height: 74px;
 				padding: 5px;
 			}
 
@@ -115,6 +115,8 @@
 		<div id="info" class="box">
 			<p style="font-weight: 700;">Maki's Place</p>
 			<p><span id="players"></span> playing!</p>
+			<p id="coords">(0,0)</p>
+			<p id="ping">__ms</p>
 		</div>
 		<!-- <div id="chat-box">
 			<textarea readonly id="chat"></textarea>
@@ -146,7 +148,8 @@
 				butt_down: {},
 				color: 0,
 				focused: true,
-				place_opacity: 0.7
+				place_opacity: 0.7,
+				mouse: {x:-1, y:-1},
 			};
 
 			var color = [
@@ -246,9 +249,9 @@
 
 			var infoDiv = document.getElementById("info");
 			infoDiv.style.opacity = 1;
-			function place(mx, my) {
-				let x = whereMouse("x", mx);
-				let y = whereMouse("y", my);
+			function place() {
+				let x = whereMouse("x", game.mouse.x);
+				let y = whereMouse("y", game.mouse.y);
 
 				if (
 					(x>=0 && x<game.board_size) &&
@@ -260,13 +263,16 @@
 					socket.emit("place-pixel", {
 						x: x,
 						y: y,
-						c: game.color
+						c: game.color,
+						token: game.token
 					});
 
-					infoDiv.style.opacity = game.place_opacity;
-					setTimeout(function() {
-						infoDiv.style.opacity = 1;
-					}, game.timeout);
+					if (game.place_timeout >= 200) {	
+						infoDiv.style.opacity = game.place_opacity;
+						setTimeout(function() {
+							infoDiv.style.opacity = 1;
+						}, game.place_timeout);
+					}
 				}
 			}
 
@@ -288,8 +294,6 @@
 				if (game.butt_down["a"]) move(0, game.move_speed);
 				if (game.butt_down["s"]) move(-game.move_speed, 0);
 				if (game.butt_down["d"]) move(game.move_speed, 0);
-
-				if (game.timeout_width > 0) drawTimeout();
 
 				window.requestAnimationFrame(update)
 			} window.requestAnimationFrame(update);
@@ -332,7 +336,7 @@
 				}, 200);
 			});
 
-			window.addEventListener("wheel", function(e) {
+			view_canvas.addEventListener("wheel", function(e) {
 				if (e.deltaY > 0) {
 					zoom(1-game.zoom_speed*2);
 				} else {
@@ -340,23 +344,37 @@
 				}
 			});
 
-			document.addEventListener("mousedown", function(e) {
-				if (e.button == 2) game.butt_down["rmb"] = true;
+			view_canvas.addEventListener("mousedown", function(e) {
+				switch (e.button) {
+					case 0: game.butt_down["lmb"] = true; place(); break;
+					case 2: game.butt_down["rmb"] = true; break;
+				}
 			});
 
 			document.addEventListener("mouseup", function(e) {
-				if (e.button == 2) game.butt_down["rmb"] = false;
+				switch (e.button) {
+					case 0: game.butt_down["lmb"] = false; break;
+					case 2: game.butt_down["rmb"] = false; break;
+				}
 			});
 
+			var coordsP = document.getElementById("coords");
 			document.addEventListener("mousemove", function(e) {
+				game.mouse.x = e.clientX;
+				game.mouse.y = e.clientY;
+
+				coordsP.textContent = "("+whereMouse("x", game.mouse.x)+","+whereMouse("y", game.mouse.y)+")";
+
 				if (game.butt_down["rmb"]) {
 					move(-e.movementX, -e.movementY);
 				}
+
+				if (game.butt_down["lmb"]) { place(); }
 			})
 
-			view_canvas.addEventListener("click", function(e) {
-				place(e.clientX, e.clientY);
-			});
+			// view_canvas.addEventListener("click", function(e) {
+			// 	place(e.clientX, e.clientY);
+			// });
 
 			document.addEventListener('contextmenu', event => event.preventDefault());
 
@@ -364,11 +382,19 @@
 			// Socket
 			// ------
 
-			var socket = io("/place");
+			var socket = io("/place/[socket_namespace]");
 
 			socket.on("game", function(res) {
 				Object.assign(game, res);
-				document.getElementById("players").textContent = game.players;
+				document.getElementById("players").textContent = game.online;
+
+				if (!game.loaded) {
+					if (game.protected) {
+						game.token = prompt("This place requires a token to draw.");
+					} else {
+						game.token = false;
+					}
+				}
 			});
 
 			socket.on("load-board", function(res) {
@@ -381,6 +407,21 @@
 				game.board.data[((res.x+(res.y*game.board_size))*4)+1] = color[res.c][1];
 				game.board.data[((res.x+(res.y*game.board_size))*4)+2] = color[res.c][2];
 				draw();
+			});
+
+			var nowPing = 0;
+			var pingP = document.getElementById("ping");
+
+			function sendPing() {
+				nowPing = Date.now();
+				socket.emit(200);
+			} sendPing();
+
+			socket.on(200, function(res) {
+				pingP.textContent = (Date.now()-nowPing) + "ms";
+				setTimeout(function() {
+					sendPing();
+				}, 1000);
 			});
 
 			// ----

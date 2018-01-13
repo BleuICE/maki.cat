@@ -4,4 +4,4 @@ public/
 settings.js
 package-lock.json
 stats.json
-routes/games/maki-place/board.json
+routes/games/maki-place/places

@@ -18,6 +18,18 @@ module.exports = {
 		public: "/public"
 	},
 
+	places: {
+		"public": {
+			token: false,
+			board_path: "public.json",
+			save_interval: 2000,
+			board_size: 512,
+			public: {
+				place_timeout: 800,
+			}
+		}
+	},
+
 	token: {
 		instagram: "",
 		makiUpload: "",

@@ -10,20 +10,21 @@
 //     "lol... fuck school amiright"
 
 var moment = require("moment");
+var io = global.io.of("/stb");
 
 var stb = {
 	online: 0,
 	users: {}
 }
 
-global.io.on("connection", function(socket) {
+io.on("connection", function(socket) {
 
 	var hs = socket.handshake.headers.referer.split("/");
 	if (hs.includes("savethebaby") == false) { return; }
 
-	global.io.emit("stb.info", stb);
+	global.io.emit("info", stb);
 
-	socket.on("stb.data", function(obj) {
+	socket.on("data", function(obj) {
 		stb.users[obj.name] = obj.clicks;
 		//console.log(stb);
 	});	
@@ -31,6 +32,7 @@ global.io.on("connection", function(socket) {
 
 setInterval(function() {
 	stb.online=Object.keys(stb.users).length;
-	global.io.emit("stb.info", stb);
-	stb.users={};
-}, 2000); // 1s
+	if (stb.online > 0) {
+		io.emit("info", stb);
+	} stb.users={};
+}, 400);
