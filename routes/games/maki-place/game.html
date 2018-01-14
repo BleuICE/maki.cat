@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<title>Place</title>
-		<link href="https://fonts.googleapis.com/css?family=Roboto:400|700" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
 		<style type="text/css">
 			body {
 				background-color: #1d1f21;
@@ -36,9 +36,14 @@
 
 			#info {
 				position: fixed; margin: auto;
-				bottom: 25px; left: 25px;
-				width: 200px; height: 58px;
-				padding: 5px;
+				bottom: 250px; left: 25px;
+				width: 200px; height: 58px; /* (18*3)+4 */
+			}
+
+			#controls {
+				position: fixed; margin: auto;
+				bottom: 25px; right: 25px;
+				width: 120px; height: 40px;
 			}
 
 			p { margin: 0; }
@@ -46,6 +51,7 @@
 			.box {
 				background-color: rgba(0,0,0,0.8);
 				outline: solid 5px rgba(0,0,0,0.4);
+				padding: 5px;
 			}
 
 			.color {
@@ -59,40 +65,43 @@
 
 			#chat-box {
 				position: fixed; margin: auto;
-				right: 50px; bottom: 50px;
+				left: 25px; bottom: 25px;
 				opacity: 1;
 				width: 350px;
 				height: 200px;
 				opacity: 1;
-				background-color: #fff;
-				padding: 5px 10px;
+				padding: 0;
 			}
 
-			#chat-box textarea {
+			#chat-box #messages {
 				border: none;
 				overflow: hidden;
-				width: 100%;
 				padding: 0;
-				height: calc(100% - 35px);
+				height: calc(100% - 29px);
 				font-family: "Roboto", sans-serif;
 				font-size: 16px;
 				resize: none;
 				background-color: transparent;
 				margin: 0;
+				padding: 2px 4px;
+				color: #fff;
+				width: calc(100% - 8px);
 			}
 
 			#chat-box input {
 				margin: 0;
 				padding: 0;
 				border: none;
-				background-color: transparent;
+				background-color: rgba(255,255,255,0.1);
 				height: 25px;
-				width: 100%;
 				font-family: "Roboto", sans-serif;
 				font-size: 16px;
+				padding: 0 4px;
+				color: #fff;
+				width: calc(100% - 8px);
 			}
 
-			input:focus {
+			textarea:focus, input:focus, div:focus {
 				outline: none;
 			}
 
@@ -104,23 +113,32 @@
 				outline: solid 5px rgba(0,0,0,0.4);
 				width: 0;
 			}*/
+
+			a,a:link,a:active,a:hover {
+				text-decoration: none;
+				color: inherit;
+			}
 		</style>
 	</head>
 	<body>
 		<canvas id="board" style="display: none;"></canvas>
 		<canvas id="view" oncontextmenu="return false;"></canvas>
+		<a href="https://maki.cat/place"><div id="info" class="box">
+			<p style="font-weight: 700;" id="name">Place</p>
+			<p><span id="players">0</span> players<span id="ping"></span></p>
+			<p id="coords">(0,0)</p>
+		</div></a>
+		<div class="box" id="chat-box">
+			<div id="messages"></div>
+			<input type="text" id="message" autocomplete="off"> 
+		</div>
+		<div class="box" id="controls">
+			<p style="font-weight: 700;" id="name">Move controls:</p>
+			<p>WASD, Q, E, RMB</p>
+		</div>
 		<div id="palette" class="box">
 			<div class="color"></div>
 		</div>
-		<div id="info" class="box">
-			<p style="font-weight: 700;" id="name">Place</p>
-			<p><span id="players">0</span> placing! <span id="ping"></span></p>
-			<p id="coords">(0,0)</p>
-		</div>
-		<!-- <div id="chat-box">
-			<textarea readonly id="chat"></textarea>
-			<input type="text" id="chat-text" autocomplete="off"> 
-		</div> -->
 		<script src="/socket.io/socket.io.js"></script>
 		<script type="text/javascript">
 
@@ -151,24 +169,7 @@
 				mouse: {x:-1, y:-1},
 			};
 
-			var color = [
-				[0,0,0],
-				[29,43,83],
-				[126,37,83],
-				[0,135,81],
-				[171,82,54],
-				[95,87,79],
-				[194,195,199],
-				[255,255,255],
-				[255,0,77],
-				[255,163,0],
-				[255,236,39],
-				[0,228,54],
-				[41,173,255],
-				[131,118,156],
-				[255,119,168],
-				[255,204,170]
-			];
+			var color = [palette];
 
 
 			// ---------
@@ -190,6 +191,15 @@
 						return Math.floor((game.y+(m-(view_canvas.height/2)+((game.board_size*game.zoom)/2)))/game.zoom);
 						break;
 				}
+			}
+
+			var message = document.getElementById("message");
+			var messages = document.getElementById("messages");
+			messages.innerHTML = "<p style='padding-top: 128px; padding-bottom: 18px; text-align: center; opacity: 0.4;'>- start of chat since connected -</p>";
+
+			function addChat(name, color, message) {
+				messages.innerHTML += "<p><span style='color: "+color+";'>"+name+":</span> "+message+"</p>";
+				messages.scrollTo(0, messages.scrollHeight);
 			}
 
 			// ------
@@ -294,6 +304,8 @@
 				if (game.butt_down["s"]) move(-game.move_speed, 0);
 				if (game.butt_down["d"]) move(game.move_speed, 0);
 
+				if (game.butt_down["lmb"]) place();
+
 				window.requestAnimationFrame(update)
 			} window.requestAnimationFrame(update);
 
@@ -367,15 +379,24 @@
 				if (game.butt_down["rmb"]) {
 					move(-e.movementX, -e.movementY);
 				}
+			});
 
-				if (game.butt_down["lmb"]) { place(); }
-			})
+
+			message.addEventListener("focus", function() { game.focused = false; });
+			message.addEventListener("focusout", function() { game.focused = true; });
+
+			message.addEventListener("keyup", function(e) {
+				if (e.key != "Enter") return;
+
+				socket.emit("chat-message", message.value);
+				message.value = "";
+			});
 
 			// view_canvas.addEventListener("click", function(e) {
 			// 	place(e.clientX, e.clientY);
 			// });
 
-			document.addEventListener('contextmenu', event => event.preventDefault());
+			document.addEventListener("contextmenu", event => event.preventDefault());
 
 			// ------
 			// Socket
@@ -391,7 +412,12 @@
 
 				if (!game.loaded) {
 					if (game.protected) {
-						game.token = prompt("This place requires a password to draw.");
+						if (window.location.search.substr(1)) {
+							game.token = window.location.search.substr(1);
+						} else {	
+							game.token = prompt("This place requires a password to draw.");
+						}
+						game.token = (game.token)? game.token.toLowerCase(): false;
 					} else {
 						game.token = false;
 					}
@@ -410,6 +436,10 @@
 				draw();
 			});
 
+			socket.on("chat-message", function(res) {
+				addChat(res.name, res.color, res.message);
+			})
+
 			var nowPing = 0;
 			var pingP = document.getElementById("ping");
 
@@ -419,7 +449,7 @@
 			} sendPing();
 
 			socket.on(200, function(res) {
-				pingP.textContent = (Date.now()-nowPing) + "ms";
+				pingP.textContent = ", " + (Date.now()-nowPing) + "ms";
 				setTimeout(function() {
 					sendPing();
 				}, 1000);

@@ -1,5 +1,7 @@
+var express = require("express");
 var moment = require("moment");
 var fs = require("fs");
+var PNG = require("pngjs").PNG;
 
 var game = {
 	online: 0
@@ -9,6 +11,8 @@ var timeout = {};
 
 // Web Server
 
+global.app.use("/place", express.static(__dirname+"/public"))
+
 global.app.get("/place", function(req, res) {
 	let public_places = "";
 	let protected_places = "";
@@ -17,15 +21,12 @@ global.app.get("/place", function(req, res) {
 	for (var i=0; i<Object.keys(global.places).length; i++) {
 		let name = Object.keys(global.places)[i];
 		let place = global.places[name];
-	
-		let start = '<td><a href="https://maki.cat/place/'+name.toLowerCase()+'"><p>';
 
-		let html = "<tr>"+
-			start+name+end+
-			start+place.board_size+"x"+place.board_size+end+
-			start+place.public.place_timeout+"ms"+end+
-			start+place.public.online+" placing!"+end+
-		"</tr>";
+		let html = '<div id="place" style="background-image: url(https://maki.cat/place/'+
+			name.toLowerCase()+'.png);"><a href="https://maki.cat/place/'+
+			name.toLowerCase()+'"><div class="rel"><p>'+
+			name+'</p><p>'+place.board_size+"x"+place.board_size+'</p><p>'+
+			place.public.place_timeout+'ms</p><p>'+place.public.online+'</p></div></a></div>';
 	
 		if (place.token) {
 			protected_places += html;
@@ -46,11 +47,32 @@ function webGetPlace(name) {
 		res.send(
 			fs.readFileSync(__dirname+"/game.html", "utf8")
 				.replace(/\[socket_namespace\]/gi, name)
+				.replace(/\[palette\]/gi, JSON.stringify(global.place.palette))
 		);
 	});
 }
 
 // Functions
+
+function makeImagePlace(place, name, force) {
+	var board_png = new PNG({width: place.board_size, height: place.board_size});
+
+	if (force || place.public.online>0) {
+		for (var y=0; y<place.board_size; y++) {
+			for (var x=0; x<place.board_size; x++) {
+				var pixel = x+(y*place.board_size);
+				board_png.data[4*pixel] = global.place.palette[place.board[pixel]][0];
+				board_png.data[4*pixel+1] = global.place.palette[place.board[pixel]][1];
+				board_png.data[4*pixel+2] = global.place.palette[place.board[pixel]][2];
+				board_png.data[4*pixel+3] = 255;
+			}
+		}
+	
+		board_png.pack()
+			.pipe(fs.createWriteStream(__dirname+"/public/"+name.toLowerCase()+".png"));
+			// .on("finish", function() { console.log('Written!'); });	
+	}
+}
 
 function loadPlace(place, name) {
 
@@ -65,8 +87,11 @@ function loadPlace(place, name) {
 			global.log("Place: '"+name+"' loaded!");
 			place.board = JSON.parse(fs.readFileSync(__dirname+"/places/"+place.board_path))
 		}
+
+		setInterval(function() {
+			makeImagePlace(place, name, false);
+		}, 10*1000); makeImagePlace(place, name, true); // 10 seconds
 	});
-	
 }
 
 // Socket.io
@@ -103,6 +128,23 @@ function makePlace(place, name) {
 			socket.emit(200);
 		});
 
+		let chat_name = 0;
+		for (var i=0; i<ip.split(".").length; i++) {
+			chat_name += parseInt(ip.split(".")[i])
+		}
+
+		chat_name = (ip=="192.168.1.1")? "Maki": ("000"+chat_name).slice(-4);
+		let chat_color = (ip=="192.168.1.1")? "#F0B4B4": "rgb("+ip.split(".")[0]+","+ip.split(".")[1]+","+ip.split(".")[2]+")";
+
+		socket.on("chat-message", function(res) {
+			if (res == "") return;
+			io.emit("chat-message", {
+				color: chat_color,
+				name:chat_name, 
+				message:res
+			});
+		});
+
 		socket.on("place-pixel", function(res) {
 			let now = moment().valueOf();
 			if (
@@ -110,7 +152,7 @@ function makePlace(place, name) {
 				(res.y>=0 && res.y<place.board_size) &&
 				(res.c>=0 && res.c<16) &&
 				(now > timeout[socket.id]) &&
-				(res.token.toLowerCase() == place.token)
+				(res.token == place.token)
 			) {
 				place.board[res.x+(res.y*place.board_size)] = res.c;
 				//global.log(ip + " placed at "+res.x+","+res.y);

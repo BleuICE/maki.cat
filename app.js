@@ -16,7 +16,10 @@ var spdy = require("spdy");
 global = require(__dirname+"/settings");
 global.__dirname = __dirname;
 global.log = function(msg) {
-	console.log("["+moment().format("HH:mm:ss, DD/MM/YY")+"] "+msg);
+	let log = "["+moment().format("HH:mm:ss, DD/MM/YY")+"] "+msg
+	//fs.writeFileSync(global.__dirname+"/"+global.dir.global_log,
+		//fs.readFileSync(global.__dirname+"/"+global.dir.global_log, "utf8")+log+"\n");
+	console.log(log);
 }
 
 // Initialise express

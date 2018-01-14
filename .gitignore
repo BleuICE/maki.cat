@@ -5,3 +5,5 @@ settings.js
 package-lock.json
 stats.json
 routes/games/maki-place/places
+server.log
+requests.old.log

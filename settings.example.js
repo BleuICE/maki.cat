@@ -14,7 +14,8 @@ module.exports = {
 
 	dir: {
 		stats: "/stats.json",
-		log: "/requests.log",
+		requests_log: "/requests.log",
+		global_log: "/server.log",
 		public: "/public"
 	},
 
@@ -28,6 +29,10 @@ module.exports = {
 				place_timeout: 800,
 			}
 		}
+	},
+
+	place: {
+		palette: []
 	},
 
 	token: {
