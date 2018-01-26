@@ -44,7 +44,7 @@ global.io = require("socket.io")(global.spdy);
 
 // Other
 require(__dirname+"/modules/logging");
-require(__dirname+"/modules/analytics");
+//require(__dirname+"/modules/analytics");
 
 // Libraries
 global.app.use("/socket.io", express.static(__dirname+"/node_modules/socket.io-client/dist"));
