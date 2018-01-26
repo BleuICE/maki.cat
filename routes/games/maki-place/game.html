@@ -140,7 +140,7 @@
 		</div></a>
 		<div class="box" id="chat-box">
 			<div id="messages"></div>
-			<input type="text" id="name" autocomplete="off" value="Player"> 
+			<input type="text" id="player-name" autocomplete="off" value="Player"> 
 			<input type="text" id="message" autocomplete="off"> 
 		</div>
 		</div>
@@ -206,6 +206,7 @@
 			}
 
 			var message = document.getElementById("message");
+			var player_name = document.getElementById("player-name");
 			var messages = document.getElementById("messages");
 			messages.innerHTML = "<p style='padding-top: 128px; padding-bottom: 18px; text-align: center; opacity: 0.4;'>- start of chat since connected -</p>";
 
@@ -396,12 +397,14 @@
 
 			message.addEventListener("focus", function() { game.focused = false; });
 			message.addEventListener("focusout", function() { game.focused = true; });
+			player_name.addEventListener("focus", function() { game.focused = false; });
+			player_name.addEventListener("focusout", function() { game.focused = true; });
 
 			message.addEventListener("keyup", function(e) {
 				if (e.key != "Enter") return;
 
 				socket.emit("chat-message", {
-					name: document.getElementById("name").value,
+					name: player_name.value,
 					color: "#FF8C8C",
 					message: message.value
 				});
