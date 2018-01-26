@@ -9,6 +9,15 @@ var game = {
 
 var timeout = {};
 
+// LITTLE FUNCTIONS
+
+function genColor() {
+	return ("#"+
+		Math.floor(Math.random()*256).toString(16)+
+		Math.floor(Math.random()*256).toString(16)+
+		Math.floor(Math.random()*256).toString(16));
+}
+
 // Web Server
 
 global.app.use("/place", express.static(__dirname+"/public"))
@@ -135,6 +144,7 @@ function makePlace(place, name) {
 
 		//chat_name = (ip=="192.168.1.1")? "Maki": ("000"+chat_name).slice(-4);
 		//let chat_color = (ip=="192.168.1.1")? "#F0B4B4": "rgb("+ip.split(".")[0]+","+ip.split(".")[1]+","+ip.split(".")[2]+")";
+		let chat_color = genColor();
 
 		socket.on("chat-message", function(res) {
 			if (res == "") return;
