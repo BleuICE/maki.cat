@@ -258,7 +258,7 @@
 					//game.x = game.x+((-(view_canvas.width/2)+game.mouse.x)*d);
 					game.x *= d;
 					game.y *= d;
-					draw_buffer = true;
+					game.draw_buffer = true;
 				}
 			}
 
@@ -266,7 +266,7 @@
 				if (game.focused) {	
 					game.x += dx;
 					game.y += dy;
-					draw_buffer = true;
+					game.draw_buffer = true;
 				}
 			}
 
@@ -306,7 +306,7 @@
 				view_ctx.webkitImageSmoothingEnabled = false;
 				view_ctx.mozImageSmoothingEnabled = false;
 				view_ctx.scale(game.zoom, game.zoom);
-				draw_buffer = true;
+				game.draw_buffer = true;
 			}
 
 			function update() {
@@ -320,9 +320,9 @@
 
 				if (game.butt_down["lmb"]) place();
 
-				if (draw_buffer) {
+				if (game.draw_buffer) {
 					draw();
-					draw_buffer = false;
+					game.draw_buffer = false;
 				}
 
 				window.requestAnimationFrame(update)
@@ -458,7 +458,7 @@
 				game.board.data[((res.x+(res.y*game.board_size))*4)+0] = color[res.c][0];
 				game.board.data[((res.x+(res.y*game.board_size))*4)+1] = color[res.c][1];
 				game.board.data[((res.x+(res.y*game.board_size))*4)+2] = color[res.c][2];
-				draw_buffer = true;
+				game.draw_buffer = true;
 			});
 
 			socket.on("chat-message", function(res) {
