@@ -149,7 +149,7 @@ function makePlace(place, name) {
 		socket.on("chat-message", function(res) {
 			if (res == "") return;
 			io.emit("chat-message", {
-				color: res.color,
+				color: chat_color,
 				name: res.name, 
 				message: res.message
 			});
