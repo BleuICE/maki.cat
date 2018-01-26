@@ -12,10 +12,11 @@ var timeout = {};
 // LITTLE FUNCTIONS
 
 function genColor() {
+	let c = global.place.palette[8+Math.floor(Math.random()*(global.place.palette.length/2))];
 	return ("#"+
-		Math.floor(Math.random()*256).toString(16)+
-		Math.floor(Math.random()*256).toString(16)+
-		Math.floor(Math.random()*256).toString(16));
+		("00"+Math.floor(c[0]).toString(16)).slice(-2)+
+		("00"+Math.floor(c[1]).toString(16)).slice(-2)+
+		("00"+Math.floor(c[2]).toString(16)).slice(-2));
 }
 
 // Web Server
@@ -110,6 +111,7 @@ function makePlace(place, name) {
 	let io = global.io.of("/place/"+name);
 	place.public.online = 0;
 	place.public.name = name;
+	place.players = {};
 	place.public.protected = (place.token)? true: false;
 
 	io.on("connection", function(socket) {
@@ -117,11 +119,17 @@ function makePlace(place, name) {
 		let ip = socket.handshake.address.split(":")[3];
 		timeout[socket.id] = moment().valueOf();
 
+		let chat_color = genColor();
+		place.players[socket.id] = {name: "_Player", color: chat_color};
+		place.public.players = Object.values(place.players);
+
 		place.public.online++;
 		global.log("Place: '"+name+"' " + ip + " joined! ("+place.public.online+" playing)");
 
 		socket.on("disconnect", function() {
 			place.public.online--;
+			delete place.players[socket.id];
+			place.public.players = Object.values(place.players);
 			global.log("Place: '"+name+"' " + ip + " left! ("+place.public.online+" playing)");
 			io.emit("game", place.public);
 		});
@@ -144,15 +152,16 @@ function makePlace(place, name) {
 
 		//chat_name = (ip=="192.168.1.1")? "Maki": ("000"+chat_name).slice(-4);
 		//let chat_color = (ip=="192.168.1.1")? "#F0B4B4": "rgb("+ip.split(".")[0]+","+ip.split(".")[1]+","+ip.split(".")[2]+")";
-		let chat_color = genColor();
 
 		socket.on("chat-message", function(res) {
 			if (res == "") return;
+			//if (res.name) updateName(res.name);
 			io.emit("chat-message", {
 				color: chat_color,
-				name: res.name, 
+				name: place.players[socket.id].name, 
 				message: res.message
 			});
+			//if (res.message == "maki!reload") io.emit("reload-page");
 		});
 
 		socket.on("place-pixel", function(res) {
@@ -169,6 +178,16 @@ function makePlace(place, name) {
 				io.emit("place-pixel", res);
 				timeout[socket.id] = now+place.public.place_timeout;
 			}
+		});
+
+		function updateName(name) {
+			place.players[socket.id].name = name.replace(/\s/gi, "");
+			place.public.players = Object.values(place.players);
+			io.emit("game", place.public);
+		}
+
+		socket.on("name-change", function(name) {
+			updateName(name);
 		});
 	});
 

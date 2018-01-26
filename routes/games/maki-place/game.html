@@ -44,7 +44,8 @@
 			#info {
 				position: fixed; margin: auto;
 				bottom: 250px; left: 25px;
-				height: 58px; /* (18*3)+4 */
+				max-width: 250px;
+				overflow: hidden;
 			}
 
 			#controls {
@@ -83,6 +84,7 @@
 			#chat-box #messages {
 				border: none;
 				overflow: hidden;
+				overflow-y: scroll;
 				padding: 0;
 				height: calc(100% - 29px);
 				font-family: "Roboto", sans-serif;
@@ -108,13 +110,13 @@
 			}
 
 			#chat-box #player-name {
-				width: 60px;
+				width: 70px;
 				margin-left: -4px;
 				background-color: rgba(255,255,255,0.2);
 			}
 
 			#chat-box #message {
-				width: 258px;
+				width: 248px;
 			}
 
 			textarea:focus, input:focus, div:focus {
@@ -134,6 +136,10 @@
 				text-decoration: none;
 				color: inherit;
 			}
+
+			#chat-box #messages::-webkit-scrollbar {
+    			width: 0;
+			}
 		</style>
 	</head>
 	<body>
@@ -141,13 +147,14 @@
 		<canvas id="view" oncontextmenu="return false;"></canvas>
 		<a href="https://maki.cat/place"><div id="info" class="box">
 			<p style="font-weight: 700;" id="name">Place</p>
-			<p><span id="players">0</span> players</p>
 			<p id="coords">(0,0)</p>
+			<p><span id="players">0</span> players</p>
+			<div id="players-list" style="display: inline-block;"></div>
 		</div></a>
 		<div class="box" id="chat-box">
 			<div id="messages"></div>
 			<input type="text" id="message" autocomplete="off"> 
-			<input type="text" id="player-name" autocomplete="off" value="Player"> 
+			<input type="text" id="player-name" autocomplete="off" value="_Player"> 
 		</div>
 		</div>
 		<div class="box" id="controls">
@@ -214,11 +221,22 @@
 			var message = document.getElementById("message");
 			var player_name = document.getElementById("player-name");
 			var messages = document.getElementById("messages");
-			messages.innerHTML = "<p style='padding-top: 128px; padding-bottom: 18px; text-align: center; opacity: 0.4;'>- start of chat since connected -</p>";
+			//messages.innerHTML = "<p style='padding-top: 128px; padding-bottom: 18px; text-align: center; opacity: 0.4;'>- start of chat since connected -</p>";
+			messages.innerHTML = "<p style='padding: 18px 0; text-align: center; opacity: 0.4;'>- start of chat since connected -</p>";
 
 			function addChat(name, color, message) {
 				messages.innerHTML += "<p><span style='color: "+color+";'>"+name+":</span> "+message+"</p>";
 				messages.scrollTo(0, messages.scrollHeight);
+			}
+
+			var players_list = document.getElementById("players-list");
+			function reloadPlayersList() {
+				let html = "";
+				for (var i=0; i<game.players.length; i++) {
+					html += "<p style='color: "+game.players[i].color+";'>"+game.players[i].name+"</p>";
+				}
+
+				players_list.innerHTML = html;
 			}
 
 			// ------
@@ -409,7 +427,10 @@
 			message.addEventListener("focus", function() { game.focused = false; });
 			message.addEventListener("focusout", function() { game.focused = true; });
 			player_name.addEventListener("focus", function() { game.focused = false; });
-			player_name.addEventListener("focusout", function() { game.focused = true; });
+			player_name.addEventListener("focusout", function() {
+				game.focused = true;
+				socket.emit("name-change", player_name.value);
+			});
 
 			message.addEventListener("keyup", function(e) {
 				if (e.key != "Enter") return;
@@ -436,8 +457,8 @@
 			socket.on("game", function(res) {
 				Object.assign(game, res);
 				document.getElementById("players").textContent = game.online;
-				document.getElementById("name").textContent = document.title = 
-					game.name+"'s Place";
+				document.getElementById("name").textContent = document.title = game.name+"'s Place";
+				reloadPlayersList();
 
 				if (!game.loaded) {
 					if (game.protected) {
@@ -456,6 +477,7 @@
 			socket.on("load-board", function(res) {
 				game.board_size = res.board_size;
 				initBoard(res.board);
+				socket.emit("name-change", player_name.value);
 			});
 
 			socket.on("place-pixel", function(res) {
@@ -468,6 +490,10 @@
 			socket.on("chat-message", function(res) {
 				addChat(res.name, res.color, res.message);
 			})
+
+			socket.on("reload-page", function() {
+				document.location.reload() 
+			});
 
 			// var nowPing = 0;
 			// var pingP = document.getElementById("ping");
