@@ -179,6 +179,7 @@
 				focused: true,
 				place_opacity: 0.7,
 				mouse: {x:-1, y:-1},
+				draw_buffer: false
 			};
 
 			var color = [palette];
@@ -257,7 +258,7 @@
 					//game.x = game.x+((-(view_canvas.width/2)+game.mouse.x)*d);
 					game.x *= d;
 					game.y *= d;
-					draw();
+					draw_buffer = true;
 				}
 			}
 
@@ -265,7 +266,7 @@
 				if (game.focused) {	
 					game.x += dx;
 					game.y += dy;
-					draw();
+					draw_buffer = true;
 				}
 			}
 
@@ -305,7 +306,7 @@
 				view_ctx.webkitImageSmoothingEnabled = false;
 				view_ctx.mozImageSmoothingEnabled = false;
 				view_ctx.scale(game.zoom, game.zoom);
-				draw();
+				draw_buffer = true;
 			}
 
 			function update() {
@@ -318,6 +319,11 @@
 				if (game.butt_down["d"]) move(game.move_speed, 0);
 
 				if (game.butt_down["lmb"]) place();
+
+				if (draw_buffer) {
+					draw();
+					draw_buffer = false;
+				}
 
 				window.requestAnimationFrame(update)
 			} window.requestAnimationFrame(update);
@@ -452,7 +458,7 @@
 				game.board.data[((res.x+(res.y*game.board_size))*4)+0] = color[res.c][0];
 				game.board.data[((res.x+(res.y*game.board_size))*4)+1] = color[res.c][1];
 				game.board.data[((res.x+(res.y*game.board_size))*4)+2] = color[res.c][2];
-				draw();
+				draw_buffer = true;
 			});
 
 			socket.on("chat-message", function(res) {
