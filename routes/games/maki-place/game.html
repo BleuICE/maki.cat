@@ -90,15 +90,25 @@
 
 			#chat-box input {
 				margin: 0;
-				padding: 0;
 				border: none;
 				background-color: rgba(255,255,255,0.1);
 				height: 25px;
 				font-family: "Roboto", sans-serif;
 				font-size: 16px;
-				padding: 0 4px;
+				padding: 0 8px;
 				color: #fff;
-				width: calc(100% - 8px);
+				display: inline-block;
+			}
+
+			#chat-box #name {
+				width: 70px;
+				text-align: right;
+				background-color: rgba(255,255,255,0.2);
+			}
+
+			#chat-box #message {
+				margin-left: -4px;
+				width: 248px;
 			}
 
 			textarea:focus, input:focus, div:focus {
@@ -130,7 +140,9 @@
 		</div></a>
 		<div class="box" id="chat-box">
 			<div id="messages"></div>
+			<input type="text" id="name" autocomplete="off" value="Player"> 
 			<input type="text" id="message" autocomplete="off"> 
+		</div>
 		</div>
 		<div class="box" id="controls">
 			<p style="font-weight: 700;" id="name">Move controls:</p>
@@ -389,8 +401,8 @@
 				if (e.key != "Enter") return;
 
 				socket.emit("chat-message", {
-					name: "test",
-					color: "red",
+					name: document.getElementById("name").value,
+					color: "#FF8C8C",
 					message: message.value
 				});
 				message.value = "";
