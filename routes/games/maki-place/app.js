@@ -124,9 +124,9 @@ function makePlace(place, name) {
 			board_size: place.board_size
 		});
 
-		socket.on(200, function() {
-			socket.emit(200);
-		});
+		// socket.on(200, function() {
+		// 	socket.emit(200);
+		// });
 
 		let chat_name = 0;
 		for (var i=0; i<ip.split(".").length; i++) {

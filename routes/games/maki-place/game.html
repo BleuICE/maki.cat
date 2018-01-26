@@ -125,7 +125,7 @@
 		<canvas id="view" oncontextmenu="return false;"></canvas>
 		<a href="https://maki.cat/place"><div id="info" class="box">
 			<p style="font-weight: 700;" id="name">Place</p>
-			<p><span id="players">0</span> players<span id="ping"></span></p>
+			<p><span id="players">0</span> players</p>
 			<p id="coords">(0,0)</p>
 		</div></a>
 		<div class="box" id="chat-box">
@@ -440,20 +440,20 @@
 				addChat(res.name, res.color, res.message);
 			})
 
-			var nowPing = 0;
-			var pingP = document.getElementById("ping");
+			// var nowPing = 0;
+			// var pingP = document.getElementById("ping");
 
-			function sendPing() {
-				nowPing = Date.now();
-				socket.emit(200);
-			} sendPing();
+			// function sendPing() {
+			// 	nowPing = Date.now();
+			// 	socket.emit(200);
+			// } sendPing();
 
-			socket.on(200, function(res) {
-				pingP.textContent = ", " + (Date.now()-nowPing) + "ms";
-				setTimeout(function() {
-					sendPing();
-				}, 1000);
-			});
+			// socket.on(200, function(res) {
+			// 	pingP.textContent = ", " + (Date.now()-nowPing) + "ms";
+			// 	setTimeout(function() {
+			// 		sendPing();
+			// 	}, 1000);
+			// });
 
 			// ----
 			// Init
