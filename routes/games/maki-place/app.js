@@ -133,15 +133,15 @@ function makePlace(place, name) {
 			chat_name += parseInt(ip.split(".")[i])
 		}
 
-		chat_name = (ip=="192.168.1.1")? "Maki": ("000"+chat_name).slice(-4);
-		let chat_color = (ip=="192.168.1.1")? "#F0B4B4": "rgb("+ip.split(".")[0]+","+ip.split(".")[1]+","+ip.split(".")[2]+")";
+		//chat_name = (ip=="192.168.1.1")? "Maki": ("000"+chat_name).slice(-4);
+		//let chat_color = (ip=="192.168.1.1")? "#F0B4B4": "rgb("+ip.split(".")[0]+","+ip.split(".")[1]+","+ip.split(".")[2]+")";
 
 		socket.on("chat-message", function(res) {
 			if (res == "") return;
 			io.emit("chat-message", {
-				color: chat_color,
-				name:chat_name, 
-				message:res
+				color: res.color,
+				name: res.name, 
+				message: res.message
 			});
 		});
 

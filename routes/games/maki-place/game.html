@@ -388,7 +388,11 @@
 			message.addEventListener("keyup", function(e) {
 				if (e.key != "Enter") return;
 
-				socket.emit("chat-message", message.value);
+				socket.emit("chat-message", {
+					name: "test",
+					color: "red",
+					message: message.value
+				});
 				message.value = "";
 			});
 
