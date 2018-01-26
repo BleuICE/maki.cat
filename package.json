@@ -16,6 +16,7 @@
     "socket.io": "^2.0.4",
     "spdy": "^3.4.7",
     "sync-request": "^4.1.0",
+    "url-to-screenshot": "^2.0.1",
     "ytdl-core": "^0.18.5"
   }
 }

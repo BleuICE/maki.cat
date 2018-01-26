@@ -1,5 +1,6 @@
 module.exports = {
 	domain: "maki.cat",
+	google_analytics: "",
 
 	redirects: {
 		"steam": "https://steamcommunity.com/id/MakiXx",

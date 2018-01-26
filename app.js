@@ -18,7 +18,7 @@ global.__dirname = __dirname;
 global.log = function(msg) {
 	let log = "["+moment().format("HH:mm:ss, DD/MM/YY")+"] "+msg
 	//fs.writeFileSync(global.__dirname+"/"+global.dir.global_log,
-		//fs.readFileSync(global.__dirname+"/"+global.dir.global_log, "utf8")+log+"\n");
+	//fs.readFileSync(global.__dirname+"/"+global.dir.global_log, "utf8")+log+"\n");
 	console.log(log);
 }
 
@@ -44,6 +44,7 @@ global.io = require("socket.io")(global.spdy);
 
 // Other
 require(__dirname+"/modules/logging");
+require(__dirname+"/modules/analytics");
 
 // Libraries
 global.app.use("/socket.io", express.static(__dirname+"/node_modules/socket.io-client/dist"));
@@ -58,10 +59,11 @@ require(__dirname+"/timers/instagram");
 	require(__dirname+"/routes/pages/main");
 	require(__dirname+"/routes/pages/git");
 	require(__dirname+"/routes/pages/iplol");
-	require(__dirname+"/routes/pages/discord");
+	require(__dirname+"/routes/pages/makijs");
 	require(__dirname+"/routes/pages/polaristhicc");
 	
 	// Systems
+	require(__dirname+"/routes/systems/screenshot");
 	require(__dirname+"/routes/systems/redirect");
 	require(__dirname+"/routes/systems/upload");
 	require(__dirname+"/routes/systems/proxy");
