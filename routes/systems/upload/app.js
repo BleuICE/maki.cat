@@ -74,7 +74,7 @@ function addPage(path, page) {
 	});
 }
 
-//addPage("", "home");
+addPage("", "home");
 addPage("/scripts", "scripts");
 addPage("/faq", "faq");
 
