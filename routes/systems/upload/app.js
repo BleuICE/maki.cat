@@ -30,6 +30,7 @@ function genName(filetype) {
 }
 
 global.app.post("/api/upload", upload.multer.array("files"), function(req, res) {
+	console.log(req.body);
 	if (req.body.token != upload.token) { res.send("Invalid token!"); return; }
 	if (req.files.length <= 0) { res.send("No files received!"); return; }
 
