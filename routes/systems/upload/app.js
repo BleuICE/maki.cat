@@ -66,15 +66,15 @@ global.app.post(upload.post.upload, upload.upload.single("file"), function(req, 
 // 	});
 // });
 
-function addPage(dir, page) {
-	global.app.get(upload.folder+dir, function(req, res) {
+function addPage(path, page) {
+	global.app.get(upload.folder+path, function(req, res) {
 		let html = fs.readFileSync(__dirname+"/page.html", "utf8")
 			.replace(/\[content\]/g, fs.readFileSync(__dirname+"/"+page+".html", "utf8"));
 		res.send(html);
 	});
 }
 
-addPage("", "home");
+//addPage("", "home");
 addPage("/scripts", "scripts");
 addPage("/faq", "faq");
 
