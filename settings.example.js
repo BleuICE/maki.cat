@@ -38,7 +38,7 @@ module.exports = {
 
 	token: {
 		instagram: "",
-		makiUpload: "",
+		upload: "",
 		youtube: "",
 		cloudflare: {
 			email: "",
