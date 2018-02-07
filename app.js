@@ -63,9 +63,9 @@ require(__dirname+"/timers/instagram");
 	require(__dirname+"/routes/pages/polaristhicc");
 	
 	// Systems
-	require(__dirname+"/routes/systems/screenshot");
+	//require(__dirname+"/routes/systems/screenshot");
+	require(__dirname+"/routes/systems/upload/app");
 	require(__dirname+"/routes/systems/redirect");
-	require(__dirname+"/routes/systems/upload");
 	require(__dirname+"/routes/systems/proxy");
 	require(__dirname+"/routes/systems/bg");
 
