@@ -74,8 +74,8 @@ function addPage(dir, page) {
 	});
 }
 
-addPage("/", "home")
-addPage("/scripts", "scripts")
-addPage("/faq", "faq")
+addPage("/", "home");
+addPage("/scripts", "scripts");
+addPage("/faq", "faq");
 
 //files
