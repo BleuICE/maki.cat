@@ -37,16 +37,16 @@ global.app.post(upload.post.upload, upload.upload.single("file"), function(req, 
 	if (req.body.token != upload.token) { res.send("Invalid token!"); return; }
 	if (req.files.length <= 0) { res.send("No files received!"); return; }
 
-	let json = [];
+	//let json = [];
 	// for (let x=0; x<req.files.length; x++) {
 		let filetype = req.files[0].originalname.split(".")[req.files[0].originalname.split(".").length-1];
 		let name = genName(filetype);
 		fs.writeFileSync(upload.dest+"/"+name, req.files[0].buffer);
 		let url = upload.domain+upload.folder+"/"+name;
-		json.push(url);
+		//json.push(url);
 		global.log("Maki Upload: "+req.ip.split(":")[3]+"; files="+req.files.length+"; "+name);
 	//}
-	res.json(json);
+	res.redirect(url);
 });
 
 // global.app.post(upload.post.files, upload.upload.array("files"), function(req, res) {
@@ -66,8 +66,16 @@ global.app.post(upload.post.upload, upload.upload.single("file"), function(req, 
 // 	});
 // });
 
-global.app.get(upload.folder, function(req, res) {
-	let html = fs.readFileSync(__dirname+"/page.html", "utf8")
-		.replace(/\[content\]/g, fs.readFileSync(__dirname+"/upload.html", "utf8"));
-	res.send(html);
-});
+function addPage(dir, page) {
+	global.app.get(upload.folder+dir, function(req, res) {
+		let html = fs.readFileSync(__dirname+"/page.html", "utf8")
+			.replace(/\[content\]/g, fs.readFileSync(__dirname+"/"+page+".html", "utf8"));
+		res.send(html);
+	});
+}
+
+addPage("/", "home")
+addPage("/scripts", "scripts")
+addPage("/faq", "faq")
+
+//files
