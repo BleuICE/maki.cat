@@ -37,8 +37,8 @@ global.app.post("/api/upload", upload.multer.array("files"), function(req, res) 
 	for (let x=0; x<req.files.length; x++) {
 		let filetype = req.files[x].originalname.split(".")[req.files[x].originalname.split(".").length-1];
 		let name = genName(filetype);
-		fs.writeFileSync(makiUpload.dest+"/"+name, req.files[x].buffer);
-		json.push(makiUpload.domain+makiUpload.folder+"/"+name)
+		fs.writeFileSync(upload.dest+"/"+name, req.files[x].buffer);
+		json.push(upload.domain+upload.folder+"/"+name)
 		global.log("Maki Upload: "+req.ip.substring(7)+"; files="+req.files.length+"; "+name);
 	}
 	res.json(json);
