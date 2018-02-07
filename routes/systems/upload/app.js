@@ -12,7 +12,7 @@ var upload = {
 	domain: "https://maki.cat",
 	dest: global.__dirname+global.dir.public+"/u",
 	folder: "/u",
-	multer: multer(),
+	upload: multer(),
 }
 
 function genB64(len) {
@@ -29,7 +29,7 @@ function genName(filetype) {
 	} else { return name; }
 }
 
-global.app.post("/api/upload", upload.multer.array("files"), function(req, res) {
+global.app.post("/api/upload", upload.upload.array("files"), function(req, res) {
 	if (req.body.token != upload.token) { res.send("Invalid token!"); return; }
 	if (req.files.length <= 0) { res.send("No files received!"); return; }
 
