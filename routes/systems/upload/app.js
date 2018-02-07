@@ -12,7 +12,7 @@ var upload = {
 	domain: "https://maki.cat",
 	dest: global.__dirname+global.dir.public+"/u",
 	folder: "/u",
-	upload: multer(),
+	multer: multer(),
 }
 
 function genB64(len) {
@@ -29,20 +29,19 @@ function genName(filetype) {
 	} else { return name; }
 }
 
-global.app.post("/api/upload", upload.upload.array("files"), function(req, res) {
-	if (req.body.token != upload.token) { res.send("Invalid token!"); return; }
+global.app.post("/api/upload", upload.multer.array("files"), function(req, res) {
+	if (req.body.token != makiUpload.token) { res.send("Invalid token!"); return; }
 	if (req.files.length <= 0) { res.send("No files received!"); return; }
 
-	let json = [];
+	let json = []
 	for (let x=0; x<req.files.length; x++) {
 		let filetype = req.files[x].originalname.split(".")[req.files[x].originalname.split(".").length-1];
 		let name = genName(filetype);
-		fs.writeFileSync(upload.dest+"/"+name, req.files[x].buffer);
-		let url = upload.domain+upload.folder+"/"+name;
-		json.push(url);
-		global.log("Maki Upload: "+req.ip.split(":")[3]+"; files="+req.files.length+"; "+name);
+		fs.writeFileSync(makiUpload.dest+"/"+name, req.files[x].buffer);
+		json.push(makiUpload.domain+makiUpload.folder+"/"+name)
+		global.log("Maki Upload: "+req.ip.substring(7)+"; files="+req.files.length+"; "+name);
 	}
-	res.redirect(json);
+	res.json(json);
 });
 
 // global.app.post(upload.post.files, upload.upload.array("files"), function(req, res) {
