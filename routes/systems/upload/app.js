@@ -68,5 +68,6 @@ global.app.post(upload.post.upload, upload.upload.single("file"), function(req, 
 
 global.app.get(upload.folder, function(req, res) {
 	let html = fs.readFileSync(__dirname+"/page.html", "utf8")
-		.replace(/\[content\]/g, fs.readFileSync(__dirname+"/upload.html", "utf8"))
+		.replace(/\[content\]/g, fs.readFileSync(__dirname+"/upload.html", "utf8"));
+	res.send(html);
 });
