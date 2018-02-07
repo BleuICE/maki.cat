@@ -13,10 +13,6 @@ var upload = {
 	dest: global.__dirname+global.dir.public+"/u",
 	folder: "/u",
 	multer: multer(),
-	post: {
-		upload: "/api/upload",
-		// files: "/api/files"
-	}
 }
 
 function genB64(len) {
@@ -33,7 +29,7 @@ function genName(filetype) {
 	} else { return name; }
 }
 
-global.app.post(upload.post.upload, upload.multer.array("files"), function(req, res) {
+global.app.post("/api/upload", upload.multer.array("files"), function(req, res) {
 	if (req.body.token != upload.token) { res.send("Invalid token!"); return; }
 	if (req.files.length <= 0) { res.send("No files received!"); return; }
 
