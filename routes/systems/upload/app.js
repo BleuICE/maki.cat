@@ -45,7 +45,7 @@ global.app.post(upload.post.upload, upload.upload.single("file"), function(req, 
 		let url = upload.domain+upload.folder+"/"+name;
 		json.push(url);
 		global.log("Maki Upload: "+req.ip.split(":")[3]+"; files="+req.files.length+"; "+name);
-	}
+	//}
 	res.json(json);
 });
 
