@@ -29,9 +29,9 @@ global.app.get("/place", function(req, res) {
 	let protected_places = "";
 
 	let end = '</p></a></td>';
-	for (var i=0; i<Object.keys(global.places).length; i++) {
-		let name = Object.keys(global.places)[i];
-		let place = global.places[name];
+	for (var i=0; i<Object.keys(global.place.places).length; i++) {
+		let name = Object.keys(global.place.places)[i];
+		let place = global.place.places[name];
 
 		let html = '<div id="place" style="background-image: url(https://maki.cat/place/'+
 			name.toLowerCase()+'.png);"><a href="https://maki.cat/place/'+
@@ -210,9 +210,9 @@ function makePlace(place, name) {
 
 // Initialization
 
-for (var i=0; i<Object.keys(global.places).length; i++) {
-	let name = Object.keys(global.places)[i];
-	let place = global.places[name];
+for (var i=0; i<Object.keys(global.place.places).length; i++) {
+	let name = Object.keys(global.place.places)[i];
+	let place = global.place.places[name];
 
 	webGetPlace(place, name);
 	loadPlace(place, name);

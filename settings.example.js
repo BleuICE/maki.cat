@@ -20,26 +20,31 @@ module.exports = {
 		public: "/public"
 	},
 
-	places: {
-		"public": {
-			token: false,
-			board_path: "public.json",
-			save_interval: 2000,
-			board_size: 512,
-			public: {
-				place_timeout: 800,
+	place: {
+		palette: [],
+		places: {
+			"public": {
+				token: false,
+				board_path: "public.json",
+				save_interval: 2000,
+				board_size: 512,
+				public: {
+					place_timeout: 800,
+				}
 			}
-		}
+		},
 	},
 
-	place: {
-		palette: []
+	discord_message: {
+		url: "",
+		people: {}
 	},
 
 	token: {
 		instagram: "",
 		upload: "",
 		youtube: "",
+		soundcloud: "",
 		cloudflare: {
 			email: "",
 			key: "",

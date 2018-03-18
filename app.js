@@ -66,11 +66,13 @@ require(__dirname+"/timers/instagram");
 	//require(__dirname+"/routes/systems/screenshot");
 	require(__dirname+"/routes/systems/upload/app");
 	require(__dirname+"/routes/systems/redirect");
+	require(__dirname+"/routes/systems/message");
 	require(__dirname+"/routes/systems/proxy");
 	require(__dirname+"/routes/systems/bg");
 
 	// Trash/Games
-	require(__dirname+"/routes/trash/tube");
+	//require(__dirname+"/routes/trash/tube");
+	require(__dirname+"/routes/trash/scdl");
 	require(__dirname+"/routes/trash/chat");
 	require(__dirname+"/routes/trash/stb");
 
