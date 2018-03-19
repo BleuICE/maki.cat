@@ -11,11 +11,11 @@ global.app.get("/discord-message", function(req, res) {
 		url: global.discord_message.url,
 		qs: {
 			id: global.discord_message.people[req.query.to],
+			ip: req.connection.remoteAddress.split(":")[3],
 			name: req.query.name,
 			message: req.query.message
 		}
 	}, function(err, r_res, body) {
-		console.log(err);
 		res.send(body);
 	});
 });

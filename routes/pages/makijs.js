@@ -9,13 +9,17 @@ global.app.get("/js", function(req, res) {
 	for (var i=0; i<Object.keys(json).length; i++) {
 		let waifu = (json[Object.keys(json)[i]].waifu.username) ? json[Object.keys(json)[i]].waifu.username+" 💕" : "";
 		
+		// let coins = json[Object.keys(json)[i]].coins+"";
+		// coins = (coins.length>4)? coins.slice(0, 4)+"...": coins;
+		// 	coins="🔸 "+coins;
+
 		leaderboard += "<tr>"+ 
-			"<td><img class='avatar' src='"+json[Object.keys(json)[i]].avatarURL+"?size=1'></td>"+
+			"<td><div class='avatar' style='background-image: url("+json[Object.keys(json)[i]].avatarURL+"?size=1)'></td>"+
 			"<td>"+json[Object.keys(json)[i]].username+"</td>"+
+			"<td>"+waifu+"</td>"+
 			//"<td>Lvl. "+json[Object.keys(json)[i]].level+" ("+json[Object.keys(json)[i]].xp+"/1000)</td>"+
 			"<td>Lvl. "+json[Object.keys(json)[i]].level+"</td>"+
-			"<td>"+json[Object.keys(json)[i]].coins+" 🔸</td>"+
-			"<td>"+waifu+"</td>"+
+			"<td>🔸 "+json[Object.keys(json)[i]].coins+"</td>"+
 			"<td>"+moment.unix(json[Object.keys(json)[i]].created).format("Do MMM 'YY")+"</td>"
 		"</tr>";
 	}
