@@ -59,11 +59,13 @@ require(__dirname+"/timers/instagram");
 	require(__dirname+"/routes/pages/main");
 	require(__dirname+"/routes/pages/git");
 	require(__dirname+"/routes/pages/iplol");
-	require(__dirname+"/routes/pages/makijs");
+	//require(__dirname+"/routes/pages/makijs");
+	require(__dirname+"/routes/pages/makijs-bg");
 	require(__dirname+"/routes/pages/polaristhicc");
 	
 	// Systems
 	//require(__dirname+"/routes/systems/screenshot");
+	require(__dirname+"/routes/systems/markdown/app");
 	require(__dirname+"/routes/systems/upload/app");
 	require(__dirname+"/routes/systems/redirect");
 	require(__dirname+"/routes/systems/message");
@@ -75,6 +77,7 @@ require(__dirname+"/timers/instagram");
 	require(__dirname+"/routes/trash/scdl");
 	require(__dirname+"/routes/trash/chat");
 	require(__dirname+"/routes/trash/stb");
+	require(__dirname+"/routes/trash/fuckyou");
 
 	// Games
 	require(__dirname+"/routes/games/maki-place/app");
